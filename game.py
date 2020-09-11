@@ -104,7 +104,7 @@ class Game:
 		self.level_text.create_text("LEVEL: " + str(self.level))
 		self.score_text.create_text("SCORE: " + str(self.score))
 		self.lives_text.create_text("LIVES: " + str(self.lives))
-		self.rows = 1
+		self.rows = 5
 
 	def you_lose(self):
 		Game.WIN.fill(black)
