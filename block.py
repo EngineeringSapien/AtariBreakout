@@ -2,8 +2,6 @@ import pygame
 from boundary import Boundary
 
 
-
-
 class Block(Boundary):
 	total_blocks = 0
 	blocks = []
@@ -23,9 +21,3 @@ class Block(Boundary):
 	def collide(self):
 		Block.blocks.pop(Block.blocks.index(self))
 		Block.total_blocks -= 1
-
-
-
-
-# b1 = Block(10,10,10,10,(0,255,0),WIN)
-# print(Block.total_blocks)

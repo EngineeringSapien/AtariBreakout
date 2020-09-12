@@ -17,23 +17,30 @@ pygame.font.init()
 class Game:
 	FPS=60
 	WIDTH, HEIGHT = (gb.width, gb.height)
-	WIN = pygame.display.set_mode((WIDTH, HEIGHT))
+	WIN = pygame.display.set_mode((0,0), pygame.FULLSCREEN | pygame.DOUBLEBUF | pygame.HWSURFACE)
 	pygame.display.set_caption("BREAKOUT")
-	
-	def __init__(self, rows):
+
+	OFFSET_X = 600
+	OFFSET_Y = 200 
+
+	def __init__(self):
 		self.run = False
 		self.menu = True
-		self.rows = rows
-		self.columns = int(Game.WIDTH/Block.WIDTH)
+		self.rows = 3
+		self.columns = int((Game.WIDTH-Game.OFFSET_X)/Block.WIDTH)
 		self.score = 0
 		self.lives = 5
 		self.level = 1
 
 		self.the_ball = Ball(Ball.START_POSITION[0],Ball.START_POSITION[1],0,0,white,Game.WIN)
 		self.the_paddle = Paddle(Paddle.START_POSITION[0],Paddle.START_POSITION[1],Paddle.START_SIZE[0],Paddle.START_SIZE[1],white,Game.WIN)
-		self.score_text = TextGUI(Game.WIDTH//30, Game.HEIGHT//60, Game.WIN, "SCORE: " + str(self.score), 20)
-		self.lives_text = TextGUI(Game.WIDTH/6*5, Game.HEIGHT - Game.HEIGHT//12, Game.WIN, "LIVES: " + str(self.lives), 15)
-		self.level_text = TextGUI(Game.WIDTH/6*5, Game.HEIGHT//60, Game.WIN, "LEVEL: " + str(self.level), 20)
+		self.score_text = TextGUI(Game.WIDTH/100*15, Game.HEIGHT//60, Game.WIN, "SCORE: " + str(self.score), 50)
+		self.lives_text = TextGUI(Game.WIDTH/100*73, Game.HEIGHT - Game.HEIGHT//12, Game.WIN, "LIVES: " + str(self.lives), 20)
+		self.level_text = TextGUI(Game.WIDTH/100*60, Game.HEIGHT//60, Game.WIN, "LEVEL: " + str(self.level), 50)
+
+		self.left_boundary = Boundary(0, 0+Game.OFFSET_Y, Game.OFFSET_X//2, Game.HEIGHT, gray, Game.WIN)
+		self.right_boundary = Boundary(Game.WIDTH-Game.OFFSET_X//2, 0+Game.OFFSET_Y, Game.OFFSET_X//2, Game.HEIGHT, gray, Game.WIN)
+		self.top_boundary = Boundary(0, Game.OFFSET_Y//2, Game.WIDTH, Game.OFFSET_Y//2, gray, Game.WIN)
 
 	def break_block(self, a_block):
 		a_block.collide()
@@ -43,8 +50,8 @@ class Game:
 	def create_blocks(self):
 		for c in range(1, self.columns+1):
 			for r in range(3, self.rows+3):
-				this_x = c*Block.WIDTH-(Block.WIDTH)
-				this_y = r*Block.HEIGHT
+				this_x = c*Block.WIDTH-(Block.WIDTH)+Game.OFFSET_X//2
+				this_y = r*Block.HEIGHT+(Game.OFFSET_Y*1.4)
 				Block(this_x,this_y,0,0,random.choice(block_colors),Game.WIN)
 		
 	def increase_score(self):
@@ -59,13 +66,13 @@ class Game:
 		self.level += amount
 		self.level_text.create_text("LEVEL: " + str(self.level))
 
+	def increase_rows(self, amount):
+		self.rows += amount
+
 	def lost_level(self):
 		pygame.time.delay(666)
 		self.change_lives(-1)
 		self.reset_level()
-
-	def increase_rows(self, increment):
-		self.rows += increment
 
 	def beat_level(self):
 		pygame.time.delay(2000)
@@ -78,7 +85,7 @@ class Game:
 	def play_game(self):
 		self.menu = False
 		self.run = True
-		self.main()
+		self.main_game()
 
 	def quit_game(self):
 		quit()
@@ -87,8 +94,14 @@ class Game:
 		Game.WIN.fill(black)
 		for b in Block.blocks:
 			b.draw()
+		
 		self.the_paddle.draw()
 		self.the_ball.draw()
+
+		self.left_boundary.draw()
+		self.right_boundary.draw()
+		self.top_boundary.draw()
+
 		self.score_text.draw()
 		self.lives_text.draw()
 		self.level_text.draw()
@@ -98,33 +111,33 @@ class Game:
 		self.the_paddle.x = Game.WIDTH/2-Game.WIDTH/10/2
 
 	def reset_game(self):
-		self.score = 0
+		self.score = 11111
 		self.lives = 5
-		self.level = 1
+		self.level = 9
 		self.level_text.create_text("LEVEL: " + str(self.level))
 		self.score_text.create_text("SCORE: " + str(self.score))
 		self.lives_text.create_text("LIVES: " + str(self.lives))
-		self.rows = 5
+		self.rows = 17
 
-	def you_lose(self):
+	def lose(self):
 		Game.WIN.fill(black)
-		loser_text = TextGUI(Game.WIDTH//2-Game.WIDTH//8, Game.HEIGHT//2, Game.WIN, random.choice(all_taunts), 20)
+		loser_text = TextGUI(Game.WIDTH//4, Game.HEIGHT//2, Game.WIN, random.choice(all_taunts), 50)
 		loser_text.draw()
 		self.reset_game()
-		pygame.display.update()
+		pygame.display.flip()
 		pygame.time.delay(5000)
 		self.main_menu()
 
-	def you_win(self):
-		loser_text = TextGUI(Game.WIDTH//2-Game.WIDTH//4, Game.HEIGHT//2, Game.WIN, "YOU WIN!!!", 50)
+	def win(self):
+		loser_text = TextGUI(Game.WIDTH//2-Game.WIDTH//4, Game.HEIGHT//2, Game.WIN, "YOU WIN!!!", 100)
 		loser_text.draw()
 		self.reset_game()
-		pygame.display.update()
+		pygame.display.flip()
 		pygame.time.delay(3000)
 		self.main_menu()
 
 
-	def main(self):
+	def main_game(self):
 		self.reset_game()
 		self.reset_level()
 		self.create_blocks()
@@ -142,17 +155,17 @@ class Game:
 					quit()
 	
 			keys = pygame.key.get_pressed()
-			if keys[pygame.K_a] and self.the_paddle.x > 0:
+			if keys[pygame.K_a] and self.the_paddle.x > 0+Game.OFFSET_X//2:
 				self.the_paddle.move_left()
-			if keys[pygame.K_d] and self.the_paddle.x < Game.WIDTH - self.the_paddle.w:
+			if keys[pygame.K_d] and self.the_paddle.x < Game.WIDTH - self.the_paddle.w - Game.OFFSET_X//2:
 				self.the_paddle.move_right()
 			if keys[pygame.K_SPACE]:
-				self.the_ball.x_velocity = random.randint(-10,10)
+				quit()
 
 
-			if  self.the_ball.y < 0:
+			if  self.the_ball.y - self.the_ball.radius < 0+Game.OFFSET_Y:
 				self.the_ball.bounce_y()
-			if self.the_ball.x > Game.WIDTH or self.the_ball.x < 0:
+			if self.the_ball.x + self.the_ball.radius > Game.WIDTH-Game.OFFSET_X/2 or self.the_ball.x - self.the_ball.radius < 0+Game.OFFSET_X/2:
 				self.the_ball.bounce_x()
 
 
@@ -177,17 +190,17 @@ class Game:
 						normalized_ball_x = (self.the_ball.x - self.the_paddle.x)*-1
 
 					contact_point_fraction = (normalized_ball_x / self.the_paddle.w) + .0001
-					regularized_fraction = int(1/contact_point_fraction/2)
+					regularized_fraction = int(1/contact_point_fraction/1.5)
 					self.the_ball.x_velocity += regularized_fraction
 
 					self.the_ball.bounce_y()
 
 
 			if Block.blocks == []:
-				if self.level == 8:
+				if self.level == 10:
 					self.run = False
 					self.menu = True
-					self.you_win()
+					self.win()
 				else:
 					self.beat_level()
 
@@ -195,12 +208,12 @@ class Game:
 			if self.lives == 0:
 				self.run = False
 				self.menu = True
-				self.you_lose()
+				self.lose()
 
 
 			self.the_ball.move_ball()
 
-			pygame.display.update()
+			pygame.display.flip()
 
 
 	def main_menu(self):
@@ -236,9 +249,9 @@ class Game:
 				if event.type == pygame.QUIT:
 					quit()
 
-			pygame.display.update()
+			pygame.display.flip()
 
 
-game1 = Game(1)
+game1 = Game()
 game1.main_menu()
 

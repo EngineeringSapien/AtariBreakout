@@ -6,5 +6,6 @@ white = [255,255,255]
 yellow = [255,255,0]
 orange = [255,140,0]
 purple = [255,0,255]
+gray = [100,100,100]
 
 block_colors = [red, green, blue, yellow, orange, purple]

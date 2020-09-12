@@ -34,6 +34,3 @@ class TextGUI(GUI):
 	def draw(self):
 		self.the_textRec = (self.x, self.y)
 		self.win.blit(self.the_textSurface, self.the_textRec)
-
-# blit every frame
-# change text only when it changes (when the score, lives, or level changes)

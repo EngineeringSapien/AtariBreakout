@@ -1,5 +1,5 @@
 
 
-width = 1000
-height = 600
+width = 1900
+height = 1050
 area = width*height
