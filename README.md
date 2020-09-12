@@ -1,4 +1,4 @@
 # Atari Breakout
 My Remake of the Atari Breakout Game using PyGame.
 
-![alt text](https://github.com/EngineeringSapien/AtariBreakout/blob/master/assets/CoverPhoto.png)
+![alt text](https://github.com/EngineeringSapien/AtariBreakout/blob/master/assets/CoverPhoto.PNG)
